@@ -1,0 +1,12 @@
+- name: daemon reload
+  systemd:
+    daemon_reload: yes
+    name: "{{app.value.gerrit.user.user}}-gerrit.service"
+  become: True
+
+- name: gerrit restart
+  service:
+    name: "{{app.value.gerrit.user.user}}-gerrit"
+    state: restarted
+  become: True
+

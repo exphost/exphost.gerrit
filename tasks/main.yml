@@ -1,0 +1,80 @@
+- name: debug
+  debug:
+    msg: "jeste gerrite"
+
+- name: deb
+  debug:
+    msg: "{{app}}"
+
+
+- block:
+  - name: create dirs
+    vars:
+      base_path: "{{app.value.gerrit.user.home}}/gerrit"
+    file:
+      path: "{{item.path}}"
+      state: "directory"
+      owner: "{{item.owner|default(omit)}}"
+      group: "{{item.group|default(omit)}}"
+      mode: "{{item.mode|default(omit)}}"
+    loop:
+      - path: "{{base_path}}"
+      - path: "{{base_path}}/bin"
+      - path: "{{base_path}}/etc"
+
+  - name: make java symlink
+    file:
+      path: "{{app.value.gerrit.user.home}}/java"
+      state: "link"
+      src: "/opt/{{app.value.gerrit.java.type}}-{{app.value.gerrit.java.version}}"
+
+  - name: copy config
+    template:
+      src: gerrit.config
+      dest: "{{app.value.gerrit.user.home}}/gerrit/etc"
+
+  become: True
+  become_user: "{{app.value.gerrit.user.user}}"
+
+- block:
+  - name: download gerrit war file
+    get_url:
+      url: "https://gerrit-releases.storage.googleapis.com/gerrit-{{app.value.gerrit.version}}.war"
+      dest: "{{app.value.gerrit.user.home}}/gerrit/bin/gerrit.war"
+      mode: "0644"
+
+  - name: install git
+    yum:
+      name: git
+      state: installed
+
+  - name: copy service file
+    template:
+      src: "gerrit.service"
+      dest: "/etc/systemd/system/{{app.value.gerrit.user.user}}-gerrit.service"
+    notify:
+      - "daemon reload"
+      - "gerrit restart"
+
+  become: True
+  become_user: root
+
+- block:
+  - name: install gerrit
+    command: "$HOME/java/bin/java -jar $HOME/gerrit/bin/gerrit.war init -d $HOME/gerrit/ --no-auto-start  -b"
+    #command: "$HOME/java/bin/java -jar $HOME/gerrit/bin/gerrit.war init -d $HOME/gerrit/ --no-auto-start --install-all-plugins  -b"
+    args:
+      creates: "{{app.value.gerrit.user.home}}/gerrit/git"
+
+  become: True
+  become_user: "{{app.value.gerrit.user.user}}"
+
+- name: handlers
+  meta: flush_handlers
+
+- name: start gerrit
+  service:
+    name: "{{app.value.gerrit.user.user}}-gerrit"
+    state: started
+    enabled: True
+  become: True

@@ -1,0 +1,9 @@
+app_defaults:
+  user:
+    user: gerrit
+    group: gerrit
+    home: "/app/gerrit"
+  admin_user:
+    user: gerrit_admin
+    group: gerrit
+    home: "/app/gerrit"

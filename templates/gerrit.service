@@ -1,0 +1,15 @@
+[Unit]
+Description=Gerrit Code Review - {{app.value.gerrit.user.user}}
+After=syslog.target network.target
+
+[Service]
+Type=simple
+WorkingDirectory={{app.value.gerrit.user.home}}/gerrit
+Environment=GERRIT_HOME={{app.value.gerrit.user.home}}/gerrit/
+ExecStart={{app.value.gerrit.user.home}}/java/bin/java --add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED -Xmx1024m -jar ${GERRIT_HOME}/bin/gerrit.war daemon -d ${GERRIT_HOME}
+User=gerrit
+SyslogIdentifier=Gerrit-{{app.value.gerrit.user.user}}
+
+[Install]
+WantedBy=multi-user.target
+
