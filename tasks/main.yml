@@ -32,6 +32,14 @@
     template:
       src: gerrit.config
       dest: "{{app.value.gerrit.user.home}}/gerrit/etc"
+  - name: copy ldap secret
+    ini_file:
+      path: "{{app.value.gerrit.user.home}}/gerrit/etc/secure.config"
+      section: "ldap"
+      option: "password"
+      value: "{{app.value.gerrit.configs.auth.password}}"
+    when: app.value.gerrit.configs.auth.type == "ldap"
+
 
   become: True
   become_user: "{{app.value.gerrit.user.user}}"

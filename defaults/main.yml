@@ -7,3 +7,6 @@ app_defaults:
     user: gerrit_admin
     group: gerrit
     home: "/app/gerrit"
+  configs:
+    auth:
+      type: openid
