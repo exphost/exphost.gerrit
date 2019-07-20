@@ -1,0 +1,45 @@
+- name: ger proj
+  gerrit_project:
+    name: "{{project.name}}"
+    username: "{{app.value.gerrit.configs.auth.username}}"
+    password: "{{app.value.gerrit.configs.auth.password}}"
+    url: "{{app.value.gerrit.endpoints.http.scheme}}://{{app.value.gerrit.endpoints.http.address}}:{{app.value.gerrit.endpoints.http.port}}"
+  register: reg_project
+- block:
+  - name: create init remote
+    command: git remote add init placeholder
+    args:
+      chdir: "{{app.value.gerrit.user.home}}/gerrit/git/{{project.name}}.git"
+  - name: init
+    git:
+      repo: "{{project.init_from}}"
+      dest: "{{app.value.gerrit.user.home}}/gerrit/git/{{project.name}}.git"
+      refspec: '+refs/*:refs/*'
+      clone: false
+      bare: true
+      remote: init
+
+  become: True
+  become_user: gerrit
+  when: reg_project.created and project.init_from|default(False)
+- name: deb
+  debug:
+    msg: "{{reg_project}}"
+
+- block:
+  - name: configure replication
+    blockinfile:
+      path: "{{app.value.gerrit.user.home}}/gerrit/etc/replication.config"
+      block: |
+        {% for replication in project.replications|default([]) %}
+        [remote "{{app.key}}-{{project.name}}-{{replication.name}}"]
+          url = {{replication.url}}
+          projects = {{project.name}}
+          push = +refs/heads/*:refs/heads/*
+          push = +refs/tags/*:refs/tags/*
+          replicateOnStartup = true
+        {% endfor %}
+      marker: "# {mark} replication for app {{app.key}} project {{project.name}}"
+    notify: gerrit replication reload
+  become: True
+  become_user: gerrit
