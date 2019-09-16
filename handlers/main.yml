@@ -14,7 +14,6 @@
   uri:
     url: "{{app.value.gerrit.endpoints.http.scheme}}://{{app.value.gerrit.endpoints.http.address}}:{{app.value.gerrit.endpoints.http.port}}/a/plugins/replication/gerrit~reload"
     method: POST
-    body_format: form-urlencoded
-    body:
-      username: "{{app.value.gerrit.configs.auth.username}}"
-      password: "{{app.value.gerrit.configs.auth.password}}"
+    url_username: "{{app.value.gerrit.configs.auth.username}}"
+    url_password: "{{app.value.gerrit.configs.auth.password}}"
+  changed_when: True
