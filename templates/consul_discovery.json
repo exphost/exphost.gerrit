@@ -1,0 +1,17 @@
+{
+  "services": [
+  {
+    "name": "gerrit-{{app.key}}",
+    "tags": ["gerrit"],
+    "port": {{app.value.gerrit.endpoints.http.port}},
+    "checks": [
+    {
+      "tcp": "localhost:{{app.value.gerrit.endpoints.http.port}}",
+      "interval": "5s",
+      "timeout": "1s"
+    }
+    ]
+  }
+  ]
+}
+

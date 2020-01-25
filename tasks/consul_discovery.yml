@@ -1,0 +1,15 @@
+- name: deb
+  debug:
+    msg: "tu jestem"
+- name: stat consul shared dir
+  stat:
+    path: /app/shared/consul/conf
+  register: _consul_dir
+
+- block:
+    - name: copy consul discovery script
+      template:
+        src: consul_discovery.json
+        dest: "/app/shared/consul/conf/gerrit-{{app.key}}.json"
+  become: True
+  become_user: root
