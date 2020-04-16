@@ -40,6 +40,7 @@
           replicateOnStartup = true
         {% endfor %}
       marker: "# {mark} replication for app {{app.key}} project {{project.name}}"
+      create: True
     notify: gerrit replication reload
   become: True
   become_user: gerrit
