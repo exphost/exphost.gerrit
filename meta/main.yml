@@ -18,4 +18,3 @@ dependencies:
     java: "{{app.value.gerrit.java}}"
   - role: exphost.create_user
     user: "{{app.value.gerrit.user}}"
-
